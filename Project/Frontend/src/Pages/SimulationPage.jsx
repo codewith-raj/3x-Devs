@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
-import TopNav from '../Components/layout/TopNav'
+import TopNav from '../Components/Layout/TopNav'
 import SystemDashboard from '../Components/Layout/SystemDashboard'
 import MapView from '../Components/map/MapView'
 import PipelinePanel from '../Components/pipeline/PipelinePanel'
