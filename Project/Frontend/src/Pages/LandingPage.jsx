@@ -253,6 +253,7 @@ export default function LandingPage() {
             <div>
               <div style={{ fontSize:'10px',fontWeight:900,letterSpacing:'2px',color:'rgba(255,255,255,0.4)',margin:0 }}>कवच</div>
               <div style={{ fontSize:'16px',fontWeight:900,letterSpacing:'2px',color:'white',lineHeight:1,margin:0 }}>KAVACH</div>
+              <div style={{ fontSize:'7.5px',letterSpacing:'0.2em',color:'rgba(249,115,22,0.65)',textTransform:'uppercase',fontWeight:500 }}>Crisis Swarm Platform</div>
             </div>
           </motion.a>
 
