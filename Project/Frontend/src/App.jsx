@@ -1,8 +1,12 @@
-import React from 'react'
+import { useState } from 'react'
+import SimulationPage from './pages/SimulationPage'
+import './index.css'
 
-const App = () => {
+function App() {
   return (
-    <div>App</div>
+    <div className="app">
+      <SimulationPage />
+    </div>
   )
 }
 
