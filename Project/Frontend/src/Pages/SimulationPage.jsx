@@ -4,7 +4,7 @@ import TopNav from '../components/layout/TopNav'
 import SystemDashboard from '../components/layout/SystemDashboard'
 import MapView from '../components/map/MapView'
 import PipelinePanel from '../components/pipeline/PipelinePanel'
-import { SimulationContext } from '../context/SimulationContext'
+import {SimulationContext} from '../context/SimulationContext'
 import useSocket from '../hooks/useSocket'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
