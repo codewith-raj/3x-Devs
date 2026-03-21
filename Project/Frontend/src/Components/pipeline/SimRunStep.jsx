@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import WhatIfPanel from '../simulation/WhatIfPanel'
 import StatsBar from '../simulation/StatsBar'
 import TickCounter from '../simulation/TickCounter'

@@ -2,7 +2,7 @@ import {
   getAgentFillColor,
   getVulnerabilityColor,
   GROUP_LABELS
-} from '../../utils/agentColors'
+} from '../../Utils/agentColors'
 
 export default function AgentCard({ agent, isSelected, onClick }) {
   const groupColor = {

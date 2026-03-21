@@ -1,4 +1,4 @@
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import AgentCard from '../agents/AgentCard'
 
 const AGENT_TARGET = 50

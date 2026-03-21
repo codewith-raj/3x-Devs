@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 
 const TRIGGERS = [
   {

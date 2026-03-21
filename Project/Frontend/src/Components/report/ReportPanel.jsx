@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import VerdictSection from './VerdictSection'
 
 // Report CSS — exact styles from the HTML report files you provided

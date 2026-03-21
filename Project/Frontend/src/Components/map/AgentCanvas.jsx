@@ -1,13 +1,13 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useMap } from 'react-leaflet'
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import {
   getAgentFillColor,
   getAgentBorderColor,
   getAgentRadius,
   shouldPulse,
   getPulseColor
-} from '../../utils/agentColors'
+} from '../../Utils/agentColors'
 
 export default function AgentCanvas() {
   const map = useMap()
