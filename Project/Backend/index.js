@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-const ALLOWED_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 
 const io = new Server(server, {
   cors: {
@@ -17,8 +17,15 @@ const io = new Server(server, {
     methods: ['GET', 'POST']
   }
 });
-
-app.use(cors({ origin: ALLOWED_ORIGIN }));
+cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://kavach-frontend-two.vercel.app'  // ← add this
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
+})
 app.use(express.json());
 
 // Routes
