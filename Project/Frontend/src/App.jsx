@@ -17,16 +17,28 @@ import './index.css'
 const Preloader = ({ onDone }) => {
   const [fading, setFading] = useState(false)
 
-  useState(() => {
+  useEffect(() => {
     const fadeTimer = setTimeout(() => setFading(true), 2800)
     const removeTimer = setTimeout(() => onDone(), 3500)
-    return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer) }
-  }, [])
+    // Lock body scroll while loading
+    document.body.style.overflow = 'hidden'
+    return () => { 
+      clearTimeout(fadeTimer); 
+      clearTimeout(removeTimer);
+      document.body.style.overflow = ''
+    }
+  }, [onDone])
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#05080f] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.76,0,0.24,1)]"
+      className="fixed inset-0 flex flex-col items-center justify-center bg-[#05080f] overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.76,0,0.24,1)]"
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 99999,
         opacity: fading ? 0 : 1,
         transform: fading ? 'translateY(-20px)' : 'translateY(0)',
         pointerEvents: fading ? 'none' : 'auto',
