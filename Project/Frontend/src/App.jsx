@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import logoImg from './assets/Black_Modern_A_letter_Logo__1_-removebg-preview.png'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 
 // Scrolls to top on every route change
@@ -59,11 +60,11 @@ const Preloader = ({ onDone }) => {
         style={{ animation: 'logoGlowPulse 2.5s cubic-bezier(0.4,0,0.2,1) infinite' }}>
         <div className="absolute inset-0 bg-[#fbbf24]"
           style={{
-            WebkitMaskImage: 'url(/src/assets/Black_Modern_A_letter_Logo__1_-removebg-preview.png)',
+            WebkitMaskImage: `url(${logoImg})`,
             WebkitMaskSize: 'contain',
             WebkitMaskRepeat: 'no-repeat',
             WebkitMaskPosition: 'center',
-            maskImage: 'url(/src/assets/Black_Modern_A_letter_Logo__1_-removebg-preview.png)',
+            maskImage: `url(${logoImg})`,
             maskSize: 'contain',
             maskRepeat: 'no-repeat',
             maskPosition: 'center',

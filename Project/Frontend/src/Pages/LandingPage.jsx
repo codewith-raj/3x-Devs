@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import logoImg from '../assets/Black_Modern_A_letter_Logo__1_-removebg-preview.png';
 import { useNavigate } from 'react-router-dom';
 import {
   motion, useInView, useScroll, useTransform,
@@ -247,7 +248,7 @@ export default function LandingPage() {
         <div style={{ maxWidth:'80rem',margin:'0 auto',padding:'0 1rem',display:'flex',alignItems:'center',justifyContent:'space-between',height:'64px' }}>
           <motion.a href="#" whileHover={{ scale:1.05 }} style={{ display:'flex',alignItems:'center',gap:'12px',textDecoration:'none' }}>
             <div style={{ width:'36px',height:'36px' }}>
-              <img src="/src/assets/Black_Modern_A_letter_Logo__1_-removebg-preview.png" alt="KAVACH" style={{ width:'100%',height:'100%',objectFit:'contain',filter:'invert(1)' }} />
+              <img src={logoImg} alt="KAVACH" style={{ width:'100%',height:'100%',objectFit:'contain',filter:'invert(1)' }} />
             </div>
             <div>
               <div style={{ fontSize:'10px',fontWeight:900,letterSpacing:'2px',color:'rgba(255,255,255,0.4)',margin:0 }}>कवच</div>
