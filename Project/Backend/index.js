@@ -9,14 +9,16 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+const ALLOWED_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ALLOWED_ORIGIN,
     methods: ['GET', 'POST']
   }
 });
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
 // Routes
