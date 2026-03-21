@@ -1,15 +1,20 @@
 import { useSimulationContext } from '../../context/SimulationContext'
 import AgentCard from '../agents/AgentCard'
 
+const AGENT_TARGET = 50
+
 export default function AgentGenStep({ status, data }) {
   const { agents, selectedAgent, setSelectedAgent } = useSimulationContext()
 
-  // While generating — show progress
+  // While generating
   if (status === 'processing') {
+    const progress = Math.min(agents.length, AGENT_TARGET)
+    const pct = Math.round((progress / AGENT_TARGET) * 100)
+
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-        {/* Progress indicator */}
+        {/* Processing badge */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -20,34 +25,45 @@ export default function AgentGenStep({ status, data }) {
           borderRadius: 4
         }}>
           <div style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
+            width: 8, height: 8, borderRadius: '50%',
             background: '#f59e0b',
             animation: 'pulse-badge 1s infinite',
             flexShrink: 0
           }} />
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 10,
-            color: '#f59e0b'
-          }}>
-            Generating agents → Claude claude-sonnet-4-5
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#f59e0b' }}>
+            Generating agents → Groq llama-3.3-70b-versatile
           </span>
         </div>
 
-        {/* Agent counter — shows as agents stream in */}
-        {agents.length > 0 && (
+        {/* Progress bar + counter */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             fontFamily: 'var(--font-mono)',
             fontSize: 10,
             color: 'var(--text-secondary)'
           }}>
-            {agents.length} / 20 agents generated
+            <span>{progress} / {AGENT_TARGET} agents generated</span>
+            <span style={{ color: '#f59e0b' }}>{pct}%</span>
           </div>
-        )}
+          <div style={{
+            height: 3,
+            background: 'var(--border)',
+            borderRadius: 2,
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${pct}%`,
+              background: 'linear-gradient(to right, #f59e0b, #ff6b2b)',
+              borderRadius: 2,
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+        </div>
 
-        {/* Partial agent cards if any already loaded */}
+        {/* Partial cards — show first few as they stream in */}
         {agents.length > 0 && (
           <div style={{
             display: 'grid',
@@ -56,27 +72,36 @@ export default function AgentGenStep({ status, data }) {
             maxHeight: 300,
             overflowY: 'auto'
           }}>
-            {agents.slice(0, agents.length).map(agent => (
+            {agents.slice(0, 10).map(agent => (
               <AgentCard
                 key={agent.id}
                 agent={agent}
                 isSelected={selectedAgent?.id === agent.id}
-                onClick={() => setSelectedAgent(
-                  selectedAgent?.id === agent.id ? null : agent
-                )}
+                onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
               />
             ))}
+            {agents.length > 10 && (
+              <div style={{
+                gridColumn: '1 / -1',
+                textAlign: 'center',
+                fontSize: 10,
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)',
+                padding: '6px 0'
+              }}>
+                + {agents.length - 10} more generating...
+              </div>
+            )}
           </div>
         )}
       </div>
     )
   }
 
-  // Completed — show all agent cards
+  // Completed
   if (status === 'completed') {
-    const displayAgents = agents.length > 0
-      ? agents
-      : data?.agents || []
+    const displayAgents = agents.length > 0 ? agents : (data?.agents || [])
+    const total = displayAgents.length
 
     const distribution = data?.distribution || {
       blue:  displayAgents.filter(a => a.group === 'blue').length,
@@ -97,64 +122,33 @@ export default function AgentGenStep({ status, data }) {
             letterSpacing: '0.06em',
             marginBottom: 2
           }}>
-            AGENT DISTRIBUTION — {displayAgents.length} TOTAL
+            AGENT DISTRIBUTION — {total} TOTAL
           </div>
 
-          {/* Colored bar */}
           <div style={{
-            display: 'flex',
-            height: 6,
-            borderRadius: 3,
-            overflow: 'hidden',
-            gap: 1
+            display: 'flex', height: 6, borderRadius: 3,
+            overflow: 'hidden', gap: 1
           }}>
-            <div style={{
-              flex: distribution.blue,
-              background: '#3b82f6',
-              borderRadius: '3px 0 0 3px'
-            }} />
-            <div style={{
-              flex: distribution.red,
-              background: '#ef4444'
-            }} />
-            <div style={{
-              flex: distribution.amber,
-              background: '#f59e0b'
-            }} />
-            <div style={{
-              flex: distribution.green,
-              background: '#22c55e',
-              borderRadius: '0 3px 3px 0'
-            }} />
+            <div style={{ flex: distribution.blue,  background: '#3b82f6', borderRadius: '3px 0 0 3px' }} />
+            <div style={{ flex: distribution.red,   background: '#ef4444' }} />
+            <div style={{ flex: distribution.amber, background: '#f59e0b' }} />
+            <div style={{ flex: distribution.green, background: '#22c55e', borderRadius: '0 3px 3px 0' }} />
           </div>
 
-          {/* Legend */}
-          <div style={{
-            display: 'flex',
-            gap: 10,
-            flexWrap: 'wrap'
-          }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {[
               { color: '#3b82f6', label: 'Responders', count: distribution.blue },
-              { color: '#ef4444', label: 'Vulnerable', count: distribution.red },
-              { color: '#f59e0b', label: 'Mobile', count: distribution.amber },
-              { color: '#22c55e', label: 'Volunteers', count: distribution.green }
+              { color: '#ef4444', label: 'Vulnerable',  count: distribution.red },
+              { color: '#f59e0b', label: 'Mobile',      count: distribution.amber },
+              { color: '#22c55e', label: 'Volunteers',  count: distribution.green }
             ].map(item => (
-              <div key={item.label} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4
-              }}>
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <div style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: item.color,
-                  flexShrink: 0
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: item.color, flexShrink: 0
                 }} />
                 <span style={{
-                  fontSize: 9,
-                  color: 'var(--text-muted)',
+                  fontSize: 9, color: 'var(--text-muted)',
                   fontFamily: 'var(--font-body)'
                 }}>
                   {item.count} {item.label}
@@ -164,23 +158,23 @@ export default function AgentGenStep({ status, data }) {
           </div>
         </div>
 
-        {/* Agent cards grid */}
+        {/* Agent cards grid — 2 col, scrollable */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: 6,
-          maxHeight: 400,
+          maxHeight: 500,
           overflowY: 'auto',
-          paddingRight: 2
+          paddingRight: 2,
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#1e1e1e transparent'
         }}>
           {displayAgents.map(agent => (
             <AgentCard
               key={agent.id}
               agent={agent}
               isSelected={selectedAgent?.id === agent.id}
-              onClick={() => setSelectedAgent(
-                selectedAgent?.id === agent.id ? null : agent
-              )}
+              onClick={() => setSelectedAgent(selectedAgent?.id === agent.id ? null : agent)}
             />
           ))}
         </div>

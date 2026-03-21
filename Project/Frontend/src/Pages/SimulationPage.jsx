@@ -1,4 +1,4 @@
-import { useState, useCallback,useEffect} from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
 import TopNav from '../components/layout/TopNav'
 import SystemDashboard from '../components/layout/SystemDashboard'
@@ -50,34 +50,27 @@ export default function SimulationPage() {
   const [verdict, setVerdict]                   = useState(null)
   const [reportReady, setReportReady]           = useState(false)
   const [notifications, setNotifications] = useState([])
+  const [terminalExpanded, setTerminalExpanded] = useState(false)
 
-    // ADD THIS after all useState declarations in SimulationPage.jsx
-useEffect(() => {
-  console.log('🟡 agents changed:', agents.length, 'pageState:', pageState)
-  if (agents.length > 0 && pageState === 'processing') {
-    console.log('🟢 Force setting pageState to ready')
-    setPageState('ready')
-    setStepStatuses({
-      worldState: 'completed',
-      agentGen:   'completed',
-      simConfig:  'completed',
-      simRun:     'pending'
-    })
-  }
-}, [agents])
+  useEffect(() => {
+    if (agents.length > 0 && pageState === 'processing') {
+      setPageState('ready')
+      setStepStatuses({
+        worldState: 'completed',
+        agentGen:   'completed',
+        simConfig:  'completed',
+        simRun:     'pending'
+      })
+    }
+  }, [agents])
 
   const addLog = useCallback((message, level = 'info') => {
     const timestamp = new Date().toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      fractionalSecondDigits: 3
+      hour12: false, hour: '2-digit', minute: '2-digit',
+      second: '2-digit', fractionalSecondDigits: 3
     })
     setLogEntries(prev => [...prev.slice(-200), { timestamp, message, level }])
   }, [])
-
-
 
   const handleTickUpdate = useCallback((data) => {
     setCurrentTick(data.tick)
@@ -123,12 +116,8 @@ useEffect(() => {
     const stepKeys = ['worldState', 'agentGen', 'simConfig', 'simRun']
     const key = stepKeys[stepNumber - 1]
     if (!key) return
-
     setStepStatuses(prev => ({ ...prev, [key]: status }))
-    if (stepPayload) {
-      setStepData(prev => ({ ...prev, [key]: stepPayload }))
-    }
-
+    if (stepPayload) setStepData(prev => ({ ...prev, [key]: stepPayload }))
     if (stepNumber === 2 && status === 'completed' && stepPayload?.agents) {
       setAgents(stepPayload.agents)
     }
@@ -151,133 +140,40 @@ useEffect(() => {
     onNotification:       handleNotification
   })
 
-  // const handleUpload = useCallback(async (file) => {
-  //   setPageState('processing')
-  //   setStepStatuses({
-  //     worldState: 'processing',
-  //     agentGen:   'pending',
-  //     simConfig:  'pending',
-  //     simRun:     'pending'
-  //   })
-  //   setLogEntries([])
-  //   setAgents([])
-  //   setWorldState(null)
-  //   setReportReady(false)
-  //   setBottleneckReport(null)
-  //   setVerdict(null)
-  //   addLog(`Loading disaster advisory — ${file.name}`, 'info')
-
-  //   try {
-  //     const formData = new FormData()
-  //     formData.append('pdf', file)
-
-  //     const response = await axios.post(`${BACKEND_URL}/api/upload`, formData, {
-  //       headers: { 'Content-Type': 'multipart/form-data' }
-  //     })
-
-  //     if (response.data.success) {
-  //       const { worldState, agents, mapCenter, graphNodes, graphEdges } = response.data
-
-  //       setWorldState(worldState)
-  //       setAgents(agents)
-  //       setMapCenter(mapCenter)
-  //       setGraphNodes(graphNodes || [])
-  //       setGraphEdges(graphEdges || [])
-
-  //       // Force all steps to correct statuses
-  //       setStepStatuses({
-  //         worldState: 'completed',
-  //         agentGen:   'completed',
-  //         simConfig:  'completed',
-  //         simRun:     'pending'
-  //       })
-
-  //       // Force page to ready state
-  //       setPageState('ready')
-
-  //       addLog(`✓ Ready — ${agents.length} agents positioned on map`, 'success')
-  //     }
-  //   } catch (err) {
-  //     addLog(`✗ Upload failed: ${err.response?.data?.error || err.message}`, 'error')
-  //     setPageState('upload')
-  //     setStepStatuses({
-  //       worldState: 'error',
-  //       agentGen:   'pending',
-  //       simConfig:  'pending',
-  //       simRun:     'pending'
-  //     })
-  //   }
-  // }, [addLog])
-
   const handleUpload = useCallback(async (file) => {
-  console.log('🔵 handleUpload called', file.name)
-  setPageState('processing')
-  setStepStatuses({
-    worldState: 'processing',
-    agentGen:   'pending',
-    simConfig:  'pending',
-    simRun:     'pending'
-  })
-  setLogEntries([])
-  setAgents([])
-  setWorldState(null)
-  setReportReady(false)
-  setBottleneckReport(null)
-  setVerdict(null)
-  addLog(`Loading disaster advisory — ${file.name}`, 'info')
+    setPageState('processing')
+    setStepStatuses({ worldState: 'processing', agentGen: 'pending', simConfig: 'pending', simRun: 'pending' })
+    setLogEntries([])
+    setAgents([])
+    setWorldState(null)
+    setReportReady(false)
+    setBottleneckReport(null)
+    setVerdict(null)
+    addLog(`Loading disaster advisory — ${file.name}`, 'info')
 
-  try {
-    const formData = new FormData()
-    formData.append('pdf', file)
-
-    console.log('🔵 Sending request to backend...')
-    const response = await axios.post(`${BACKEND_URL}/api/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-
-    console.log('🔵 Response received:', response.status, response.data?.success)
-    console.log('🔵 Agents count:', response.data?.agents?.length)
-    console.log('🔵 WorldState:', response.data?.worldState?.disaster)
-
-    if (response.data.success) {
-      const { worldState, agents, mapCenter, graphNodes, graphEdges } = response.data
-
-      console.log('🟢 Setting state — agents:', agents.length, 'mapCenter:', mapCenter)
-
-      setWorldState(worldState)
-      setAgents(agents)
-      setMapCenter(mapCenter)
-      setGraphNodes(graphNodes || [])
-      setGraphEdges(graphEdges || [])
-
-      console.log('🟢 Setting stepStatuses to all completed except simRun')
-      setStepStatuses({
-        worldState: 'completed',
-        agentGen:   'completed',
-        simConfig:  'completed',
-        simRun:     'pending'
+    try {
+      const formData = new FormData()
+      formData.append('pdf', file)
+      const response = await axios.post(`${BACKEND_URL}/api/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       })
-
-      console.log('🟢 Setting pageState to ready')
-      setPageState('ready')
-
-      addLog(`✓ Ready — ${agents.length} agents positioned on map`, 'success')
-      console.log('🟢 All state set — pageState should be ready now')
-    } else {
-      console.log('🔴 response.data.success is false')
+      if (response.data.success) {
+        const { worldState, agents, mapCenter, graphNodes, graphEdges } = response.data
+        setWorldState(worldState)
+        setAgents(agents)
+        setMapCenter(mapCenter)
+        setGraphNodes(graphNodes || [])
+        setGraphEdges(graphEdges || [])
+        setStepStatuses({ worldState: 'completed', agentGen: 'completed', simConfig: 'completed', simRun: 'pending' })
+        setPageState('ready')
+        addLog(`✓ Ready — ${agents.length} agents positioned on map`, 'success')
+      }
+    } catch (err) {
+      addLog(`✗ Upload failed: ${err.response?.data?.error || err.message}`, 'error')
+      setPageState('upload')
+      setStepStatuses({ worldState: 'error', agentGen: 'pending', simConfig: 'pending', simRun: 'pending' })
     }
-  } catch (err) {
-    console.log('🔴 Upload error:', err.message, err.response?.data)
-    addLog(`✗ Upload failed: ${err.response?.data?.error || err.message}`, 'error')
-    setPageState('upload')
-    setStepStatuses({
-      worldState: 'error',
-      agentGen:   'pending',
-      simConfig:  'pending',
-      simRun:     'pending'
-    })
-  }
-}, [addLog])
+  }, [addLog])
 
   const handleStartSimulation = useCallback(() => {
     if (!socket) return
@@ -316,37 +212,18 @@ useEffect(() => {
     return 'idle'
   }
 
+  // Dynamic terminal height
+  const terminalHeight = terminalExpanded ? 280 : 130
+
   const contextValue = {
-    pageState,
-    worldState,
-    agents,
-    selectedAgent,
-    setSelectedAgent,
-    graphNodes,
-    graphEdges,
-    mapCenter,
-    stepStatuses,
-    stepData,
-    currentTick,
-    currentTime,
-    isRunning,
-    tickSpeed,
-    affectedNodes,
-    affectedRoads,
-    shelterOccupancy,
-    pendingRequests,
-    disasterColor,
-    disasterLabel,
-    stats,
-    logEntries,
-    bottleneckReport,
-    verdict,
-    reportReady,
-    notifications,
-    handleUpload,
-    handleStartSimulation,
-    handleSpeedChange,
-    handleWhatIf
+    pageState, worldState, agents, selectedAgent, setSelectedAgent,
+    graphNodes, graphEdges, mapCenter, stepStatuses, stepData,
+    currentTick, currentTime, isRunning, tickSpeed,
+    affectedNodes, affectedRoads, shelterOccupancy, pendingRequests,
+    disasterColor, disasterLabel, stats, logEntries,
+    bottleneckReport, verdict, reportReady, notifications,
+    terminalExpanded, setTerminalExpanded,
+    handleUpload, handleStartSimulation, handleSpeedChange, handleWhatIf
   }
 
   return (
@@ -369,19 +246,21 @@ useEffect(() => {
           pageState={pageState}
         />
 
+        {/* Content row — map left (55%) + pipeline right (45%) */}
         <div style={{
           flex: 1,
           display: 'flex',
           overflow: 'hidden',
-          height: `calc(100vh - var(--topnav-height) - var(--dashboard-height))`
+          minHeight: 0
         }}>
 
-          {/* Left — Map */}
+          {/* Left — Map, 55% */}
           <div style={{
-            flex: 1,
+            width: '55%',
             position: 'relative',
             overflow: 'hidden',
-            background: '#0a0f1a'
+            background: '#0a0f1a',
+            flexShrink: 0
           }}>
             <MapView />
 
@@ -424,9 +303,9 @@ useEffect(() => {
             )}
           </div>
 
-          {/* Right — Pipeline */}
+          {/* Right — Pipeline, 45% */}
           <div style={{
-            width: 'var(--sidebar-width)',
+            width: '45%',
             borderLeft: '1px solid var(--border)',
             overflow: 'hidden',
             display: 'flex',
@@ -437,7 +316,12 @@ useEffect(() => {
           </div>
         </div>
 
-        <SystemDashboard />
+        {/* Terminal — always full width, expandable */}
+        <SystemDashboard
+          expanded={terminalExpanded}
+          onToggleExpand={() => setTerminalExpanded(e => !e)}
+          height={terminalHeight}
+        />
       </div>
     </SimulationContext.Provider>
   )
@@ -473,19 +357,19 @@ function UploadOverlay({ onUpload }) {
     }}>
       <div style={{
         fontFamily: 'var(--font-mono)',
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: 700,
         color: 'var(--text-primary)',
-        marginBottom: 8,
+        marginBottom: 6,
         letterSpacing: '0.04em'
       }}>
         🌊 CRISISSWARM
       </div>
       <div style={{
         fontFamily: 'var(--font-body)',
-        fontSize: 13,
+        fontSize: 12,
         color: 'var(--text-secondary)',
-        marginBottom: 40,
+        marginBottom: 32,
         textAlign: 'center'
       }}>
         Multi-Agent Disaster Response Simulation Platform
@@ -497,8 +381,8 @@ function UploadOverlay({ onUpload }) {
         onDrop={handleDrop}
         onClick={() => document.getElementById('pdf-input').click()}
         style={{
-          width: 380,
-          height: 180,
+          width: 340,
+          height: 160,
           border: `2px dashed ${dragging ? 'var(--accent-orange)' : 'var(--border-light)'}`,
           borderRadius: 8,
           display: 'flex',
@@ -508,10 +392,10 @@ function UploadOverlay({ onUpload }) {
           cursor: 'pointer',
           transition: 'all 0.2s ease',
           background: dragging ? 'rgba(255,107,43,0.05)' : 'rgba(255,255,255,0.02)',
-          gap: 10
+          gap: 8
         }}
       >
-        <div style={{ fontSize: 32 }}>📄</div>
+        <div style={{ fontSize: 28 }}>📄</div>
         <div style={{
           fontFamily: 'var(--font-mono)',
           fontSize: 12,
@@ -526,8 +410,7 @@ function UploadOverlay({ onUpload }) {
           textAlign: 'center',
           fontFamily: 'var(--font-body)'
         }}>
-          Drag & drop or click to browse
-          <br />
+          Drag & drop or click to browse<br />
           Supports any Indian district emergency advisory
         </div>
       </div>
@@ -541,14 +424,14 @@ function UploadOverlay({ onUpload }) {
       />
 
       <div style={{
-        marginTop: 20,
+        marginTop: 16,
         fontSize: 10,
         color: 'var(--text-muted)',
         fontFamily: 'var(--font-mono)',
-        textAlign: 'center'
+        textAlign: 'center',
+        lineHeight: 1.8
       }}>
-        Works with NDMA advisories, DDMA bulletins, IMD warnings
-        <br />
+        Works with NDMA advisories, DDMA bulletins, IMD warnings<br />
         Any Indian state · Any disaster type
       </div>
     </div>
