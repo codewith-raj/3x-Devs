@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import axios from 'axios'
-import TopNav from '../components/layout/TopNav';
-import SystemDashboard from '../components/layout/SystemDashboard';
-import MapView from '../components/map/MapView';
-import PipelinePanel from '../components/pipeline/PipelinePanel';
-import { SimulationContext } from '../context/SimulationContext';
-import useSocket from '../hooks/useSocket'
+import TopNav from '../Components/layout/TopNav'
+import SystemDashboard from '../Components/Layout/SystemDashboard'
+import MapView from '../Components/map/MapView'
+import PipelinePanel from '../Components/pipeline/PipelinePanel'
+import { SimulationContext } from '../Context/SimulationContext'
+import useSocket from '../Hooks/useSocket.js'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
