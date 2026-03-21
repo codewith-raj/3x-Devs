@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+
+// Scrolls to top on every route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import LandingPage from './Pages/LandingPage'
 import AnalysisPage from './Pages/AnalysisPage'
 import SimulationPage from './Pages/SimulationPage'
@@ -91,6 +98,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       {loading && <Preloader onDone={() => setLoading(false)} />}
       <Routes>
         {/* Landing page — entry point */}
