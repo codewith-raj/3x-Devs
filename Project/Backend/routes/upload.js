@@ -134,8 +134,74 @@ const extractJsonArray = (text) => {
   throw new Error(`No JSON array found. Response preview: ${cleaned.slice(0, 300)}`);
 };
 
-// ── Generate one batch of 25 agents ──────────────────────────
+// ── Hard coordinate correction ────────────────────────────────
+// Groq hallucinates coordinates from training data — this clamps
+// every agent to within 0.08° of the actual map_center from worldState
+
+// ── Hard coordinate correction ────────────────────────────────
+const correctCoordinates = (agents, worldState) => {
+  const centerLat = worldState.map_center.lat;
+  const centerLng = worldState.map_center.lng;
+  const MAX_DRIFT = 0.08;
+
+  // SAFETY CHECK — if map_center itself is outside India, fix it first
+  if (centerLat < 6 || centerLat > 37 || centerLng < 68 || centerLng > 98) {
+    console.error(`[UPLOAD] map_center is outside India: ${centerLat}, ${centerLng} — agents will be wrong`);
+  }
+
+  const seen = new Set();
+
+  return agents.map((agent, i) => {
+    let lat = parseFloat(agent.lat);
+    let lng = parseFloat(agent.lng);
+
+    // Check 1: outside India entirely
+    const outsideIndia = isNaN(lat) || isNaN(lng) || lat < 6 || lat > 37 || lng < 68 || lng > 98;
+
+    // Check 2: too far from map center
+    const latOff = Math.abs(lat - centerLat);
+    const lngOff = Math.abs(lng - centerLng);
+    const tooFarFromCenter = latOff > MAX_DRIFT || lngOff > MAX_DRIFT;
+
+    if (outsideIndia || tooFarFromCenter) {
+      // Spread agents in a grid pattern around map_center
+      const row    = Math.floor(i / 8);
+      const col    = i % 8;
+      const spread = 0.05;
+      lat = centerLat + (row - 3) * (spread / 5) + (Math.random() - 0.5) * 0.005;
+      lng = centerLng + (col - 4) * (spread / 5) + (Math.random() - 0.5) * 0.005;
+      console.log(`[UPLOAD] Agent ${i+1} coords corrected to center: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    }
+
+    // Ensure uniqueness
+    let key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+    while (seen.has(key)) {
+      lat += (Math.random() - 0.5) * 0.004;
+      lng += (Math.random() - 0.5) * 0.004;
+      key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+    }
+    seen.add(key);
+
+    return { ...agent, lat: parseFloat(lat.toFixed(5)), lng: parseFloat(lng.toFixed(5)) };
+  });
+};
+
+
+// ── Generate one batch of agents ──────────────────────────────
 const generateBatch = async (worldState, group, count, startId) => {
+  const centerLat = worldState.map_center.lat;
+  const centerLng = worldState.map_center.lng;
+
+  // Pre-compute example coordinates so Groq has concrete numbers to follow
+  // instead of hallucinating its own
+  const exampleCoords = Array.from({ length: count }, (_, i) => {
+    const row = Math.floor(i / 5);
+    const col = i % 5;
+    const lat = (centerLat + (row - 2) * 0.012 + (Math.random() - 0.5) * 0.004).toFixed(4);
+    const lng = (centerLng + (col - 2) * 0.012 + (Math.random() - 0.5) * 0.004).toFixed(4);
+    return `agent ${startId + i}: lat=${lat}, lng=${lng}`;
+  }).join('\n');
+
   const groupDesc = {
     blue:  'responders and infrastructure operators: police officers, NDRF coordinators, hospital staff, shelter managers, ambulance drivers, district officials, PWD engineers, civil defense personnel',
     red:   'vulnerable people in red zones who CANNOT self-evacuate: pregnant women, elderly people alone, wheelchair users, people with no phone, people with no vehicle, people with critical medical needs',
@@ -159,26 +225,36 @@ DESCRIPTION: ${groupDesc[group]}
 IDs must be ${startId} through ${startId + count - 1} (sequential).
 
 Available zones: ${zoneList}
-Map center: lat=${worldState.map_center.lat}, lng=${worldState.map_center.lng}
-Place agents within 0.08 degrees of map center. Each agent must have UNIQUE lat/lng (differ by 0.002+ degrees).
+
+CRITICAL COORDINATE RULE — THIS IS THE MOST IMPORTANT INSTRUCTION:
+The simulation takes place in ${worldState.disaster.location}, ${worldState.disaster.state}.
+The EXACT map center is: lat=${centerLat}, lng=${centerLng}
+Every agent MUST have lat within ${centerLat - 0.08} to ${centerLat + 0.08}
+Every agent MUST have lng within ${centerLng - 0.08} to ${centerLng + 0.08}
+Do NOT use coordinates from any other city or state.
+Do NOT use coordinates from Kerala, Tamil Nadu, or any southern state unless that IS the location.
+Use THESE exact coordinate ranges — no exceptions.
+
+Suggested coordinates for each agent (use these as a base, vary slightly):
+${exampleCoords}
 
 REQUIRED FIELDS for each agent:
 - id (number, ${startId} to ${startId + count - 1})
 - name (realistic Indian name for ${worldState.disaster.state})
 - age (number, 18-75)
-- role (specific job title)
+- role (specific job title relevant to ${worldState.disaster.location})
 - group ("${group}")
 - zone (exact zone name from the list above)
-- neighborhood (specific area within zone)
-- lat (number, near ${worldState.map_center.lat})
-- lng (number, near ${worldState.map_center.lng})
+- neighborhood (specific area within ${worldState.disaster.location})
+- lat (number between ${(centerLat - 0.08).toFixed(4)} and ${(centerLat + 0.08).toFixed(4)})
+- lng (number between ${(centerLng - 0.08).toFixed(4)} and ${(centerLng + 0.08).toFixed(4)})
 - hasVehicle (boolean)
 - hasPhone (boolean)
 - hasSmartphone (boolean)
 - vulnerability ("low", "medium", "high", or "critical")
-- destination (where they need to go)
-- backstory (one sentence about their situation)
-- initialThought (first person thought at disaster onset)
+- destination (where they need to go in ${worldState.disaster.location})
+- backstory (one sentence about their situation in ${worldState.disaster.location})
+- initialThought (first person thought at disaster onset, references ${worldState.disaster.location})
 
 ${group === 'red' ? 'All red agents must have vulnerability "high" or "critical". Give them diverse failure modes: no phone, disabled, elderly alone, blocked route.' : ''}
 ${group === 'blue' ? 'All blue agents must have hasPhone: true. Give them diverse official roles.' : ''}
@@ -190,11 +266,15 @@ Return ONLY the JSON array. Start your response with [ and end with ]. No other 
     messages: [
       {
         role: 'system',
-        content: 'You output only raw JSON arrays. Your entire response must start with [ and end with ]. No markdown, no explanation, no text outside the JSON array.'
+        content: `You output only raw JSON arrays for disaster simulation agents.
+Your entire response must start with [ and end with ].
+No markdown, no explanation, no text outside the JSON array.
+CRITICAL: All lat/lng coordinates must be within 0.08 degrees of lat=${centerLat}, lng=${centerLng}.
+This simulation is in ${worldState.disaster.location}, ${worldState.disaster.state} — use coordinates for that location only.`
       },
       { role: 'user', content: prompt }
     ],
-    temperature: 0.4,
+    temperature: 0.3,
     max_tokens: 8000
   });
 
@@ -202,11 +282,14 @@ Return ONLY the JSON array. Start your response with [ and end with ]. No other 
   const agents = extractJsonArray(text);
 
   // Enforce correct group and sequential IDs
-  return agents.slice(0, count).map((a, i) => ({
+  const fixed = agents.slice(0, count).map((a, i) => ({
     ...a,
     id:    startId + i,
     group: group
   }));
+
+  // Hard-correct any hallucinated coordinates to actual location
+  return correctCoordinates(fixed, worldState);
 };
 
 // ── Generate all 100 agents via 4 sequential Groq batches ────
@@ -235,7 +318,12 @@ const generateAgentsViaGroq = async (worldState, emitLog) => {
   }
 
   emitLog(`✓ All ${allAgents.length} agents generated via Groq`, 'success');
-  return allAgents;
+
+  // Final safety pass — correct any remaining coordinate drift
+  const corrected = correctCoordinates(allAgents, worldState);
+  emitLog(`✓ Coordinates validated and corrected to ${worldState.disaster.location} bounds`, 'info');
+
+  return corrected;
 };
 
 // ── Route ─────────────────────────────────────────────────────
