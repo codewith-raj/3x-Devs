@@ -7,7 +7,8 @@ import PipelinePanel from '../components/pipeline/PipelinePanel'
 import { SimulationContext } from '../context/SimulationContext'
 import useSocket from '../hooks/useSocket'
 
-const BACKEND_URL = 'http://localhost:5000'
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 export default function SimulationPage() {
   const [pageState, setPageState] = useState('upload')
