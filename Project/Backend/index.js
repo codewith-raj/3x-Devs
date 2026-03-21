@@ -9,26 +9,33 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
+// ── Allowed origins — localhost + deployed frontend ───────────
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://kavach-frontend-two.vercel.app',
+  process.env.FRONTEND_URL  // fallback from .env if set
+].filter(Boolean);
 
-
+// ── Socket.io with CORS ───────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: ALLOWED_ORIGIN,
-    methods: ['GET', 'POST']
+    origin: ALLOWED_ORIGINS,
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
-cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'https://kavach-frontend-two.vercel.app'  // ← add this
-  ],
+
+// ── Express CORS ──────────────────────────────────────────────
+app.use(cors({
+  origin: ALLOWED_ORIGINS,
   methods: ['GET', 'POST'],
   credentials: true
-})
+}));
+
 app.use(express.json());
 
-// Routes
+// ── Routes ────────────────────────────────────────────────────
 const uploadRoute = require('./routes/upload');
 app.use('/api', uploadRoute);
 
@@ -38,15 +45,14 @@ global.io = io;
 // Active simulation runner reference
 let activeSimulation = null;
 
+// ── Socket.io connection handler ──────────────────────────────
 io.on('connection', (socket) => {
   console.log(`[SOCKET] Client connected: ${socket.id}`);
 
-  // Emit pipeline step update
   const emitPipelineStep = (stepNumber, status, data = {}) => {
     socket.emit('pipeline-step', { stepNumber, status, data });
   };
 
-  // Emit log event to terminal dashboard
   const emitLog = (message, level = 'info') => {
     const timestamp = new Date().toLocaleTimeString('en-US', {
       hour12: false,
@@ -58,15 +64,13 @@ io.on('connection', (socket) => {
     socket.emit('log-event', { timestamp, message, level });
   };
 
-  // Make emitters available globally for this socket session
   socket.emitLog = emitLog;
   socket.emitPipelineStep = emitPipelineStep;
 
-  // Handle what-if triggers during simulation
+  // What-if triggers
   socket.on('what-if-trigger', (payload) => {
     console.log(`[WHATIF] Trigger received: ${payload.triggerType}`);
     emitLog(`What-if triggered: ${payload.triggerType}`, 'warn');
-
     if (activeSimulation) {
       activeSimulation.handleWhatIf(payload, io);
     } else {
@@ -74,7 +78,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle simulation start request
+  // Start simulation
   socket.on('start-simulation', () => {
     console.log(`[SIM] Start simulation requested by ${socket.id}`);
     emitLog('Simulation start requested', 'info');
@@ -98,7 +102,7 @@ io.on('connection', (socket) => {
     emitLog('Simulation started — 10 ticks at 1500ms intervals', 'success');
   });
 
-  // Handle tick speed change
+  // Tick speed control
   socket.on('set-tick-speed', (speed) => {
     if (activeSimulation) {
       activeSimulation.setSpeed(speed);
@@ -111,7 +115,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Health check
+// ── Health check ──────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -122,13 +126,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// ── Start server ──────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`
 ╔══════════════════════════════════════╗
 ║     CrisisSwarm Backend Running      ║
 ║     Port: ${PORT}                       ║
-║     Frontend: localhost:5173         ║
+║     Allowed origins:                 ║
+${ALLOWED_ORIGINS.map(o => `║       ${o.padEnd(30)}║`).join('\n')}
 ╚══════════════════════════════════════╝
   `);
 });
