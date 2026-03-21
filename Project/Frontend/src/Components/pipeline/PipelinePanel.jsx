@@ -1,4 +1,4 @@
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import StepCard from './StepCard'
 import WorldStateStep from './WorldStateStep'
 import AgentGenStep from './AgentGenStep'

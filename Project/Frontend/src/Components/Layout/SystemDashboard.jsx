@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useSimulationContext } from '../../context/SimulationContext'
-import { formatLogEntry } from '../../utils/formatLog'
+import { useSimulationContext } from '../../Context/SimulationContext'
+import {formatLogEntry} from '../../Utils/formatLog'
 
 export default function SystemDashboard({ expanded, onToggleExpand, height }) {
   const { logEntries, worldState } = useSimulationContext()

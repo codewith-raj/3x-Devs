@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 import AgentCanvas from './AgentCanvas'
 import ZoneOverlays from './ZoneOverlays'
 

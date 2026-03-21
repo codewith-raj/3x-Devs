@@ -1,4 +1,4 @@
-import { useSimulationContext } from '../../context/SimulationContext'
+import { useSimulationContext } from '../../Context/SimulationContext'
 
 export default function TopNav({
   stepLabel,
