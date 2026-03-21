@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LandingPage from './Pages/LandingPage'
 import AnalysisPage from './Pages/AnalysisPage'
-import SimulationPage from './pages/SimulationPage'
+import SimulationPage from './Pages/SimulationPage'
 import './index.css'
 
 // ── Preloader (from new App) ──────────────────────────────────
