@@ -180,7 +180,7 @@ export default function Chatbot() {
       >
         {isOpen ? <X size={24} className="text-white" /> : <Bot size={26} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />}
         {!isOpen && (
-          <span className="absolute 0 top-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-[#05080f] rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+          <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-[#05080f] rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
         )}
       </button>
     </>

@@ -51,7 +51,7 @@ export default function TopNav({
           color: 'var(--text-primary)',
           letterSpacing: '0.06em'
         }}>
-          CRISISSWARM
+         KAVACH
         </span>
         {worldState && (
           <span style={{

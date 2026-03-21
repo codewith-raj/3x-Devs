@@ -201,7 +201,7 @@ export default function SimulationPage() {
     if (pageState === 'ready')       return 'Step 4/4  Ready to Simulate'
     if (pageState === 'running')     return 'Step 4/4  Simulation Running'
     if (pageState === 'report')      return 'Step 4/4  Report Ready'
-    return 'CrisisSwarm'
+    return 'KAVACH'
   }
 
   const getStepStatus = () => {
@@ -212,7 +212,6 @@ export default function SimulationPage() {
     return 'idle'
   }
 
-  // Dynamic terminal height
   const terminalHeight = terminalExpanded ? 280 : 130
 
   const contextValue = {
@@ -246,7 +245,6 @@ export default function SimulationPage() {
           pageState={pageState}
         />
 
-        {/* Content row — map left (55%) + pipeline right (45%) */}
         <div style={{
           flex: 1,
           display: 'flex',
@@ -254,7 +252,7 @@ export default function SimulationPage() {
           minHeight: 0
         }}>
 
-          {/* Left — Map, 55% */}
+          {/* Left — Map 55% */}
           <div style={{
             width: '55%',
             position: 'relative',
@@ -303,7 +301,7 @@ export default function SimulationPage() {
             )}
           </div>
 
-          {/* Right — Pipeline, 45% */}
+          {/* Right — Pipeline 45% */}
           <div style={{
             width: '45%',
             borderLeft: '1px solid var(--border)',
@@ -316,7 +314,6 @@ export default function SimulationPage() {
           </div>
         </div>
 
-        {/* Terminal — always full width, expandable */}
         <SystemDashboard
           expanded={terminalExpanded}
           onToggleExpand={() => setTerminalExpanded(e => !e)}
@@ -355,26 +352,36 @@ function UploadOverlay({ onUpload }) {
       zIndex: 500,
       backdropFilter: 'blur(4px)'
     }}>
+
+      {/* Logo */}
       <div style={{
         fontFamily: 'var(--font-mono)',
-        fontSize: 26,
+        fontSize: 32,
         fontWeight: 700,
         color: 'var(--text-primary)',
-        marginBottom: 6,
-        letterSpacing: '0.04em'
+        marginBottom: 4,
+        letterSpacing: '0.08em',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10
       }}>
-        🌊 CRISISSWARM
+        <span style={{ fontSize: 28 }}>🛡️</span>
+        KAVACH
       </div>
+
+      {/* Subtitle */}
       <div style={{
         fontFamily: 'var(--font-body)',
         fontSize: 12,
         color: 'var(--text-secondary)',
         marginBottom: 32,
-        textAlign: 'center'
+        textAlign: 'center',
+        letterSpacing: '0.02em'
       }}>
         Multi-Agent Disaster Response Simulation Platform
       </div>
 
+      {/* Drop zone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
@@ -423,6 +430,7 @@ function UploadOverlay({ onUpload }) {
         onChange={handleFileInput}
       />
 
+      {/* Bottom hint */}
       <div style={{
         marginTop: 16,
         fontSize: 10,

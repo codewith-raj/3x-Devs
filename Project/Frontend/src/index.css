@@ -45,7 +45,9 @@
 html, body, #root {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  /* overflow intentionally NOT set here — each page controls its own scroll.
+     SimulationPage uses overflow:hidden on its root div directly.
+     LandingPage and AnalysisPage need to scroll freely. */
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body);

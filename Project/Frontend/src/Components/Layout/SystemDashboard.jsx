@@ -5,7 +5,7 @@ import { formatLogEntry } from '../../utils/formatLog'
 export default function SystemDashboard({ expanded, onToggleExpand, height }) {
   const { logEntries, worldState } = useSimulationContext()
   const scrollRef = useRef(null)
-  const simId = useRef(`sim_crisisswarm_${Math.random().toString(36).substr(2, 8)}`)
+  const simId = useRef(`sim_kavach_${Math.random().toString(36).substr(2, 8)}`)
 
   useEffect(() => {
     if (scrollRef.current) {
