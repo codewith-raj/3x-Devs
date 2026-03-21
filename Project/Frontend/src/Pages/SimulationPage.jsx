@@ -7,7 +7,7 @@ import PipelinePanel from '../Components/pipeline/PipelinePanel'
 import { SimulationContext } from '../Context/SimulationContext'
 import useSocket from '../Hooks/useSocket.js'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '')
 
 
 export default function SimulationPage() {
