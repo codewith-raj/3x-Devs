@@ -49,17 +49,17 @@
 ## Screenshots
 
 ### Landing Page
-![Landing Page](./screenshots/main_page.jpeg)
-![Landing Page](./screenshots/main_page2.jpeg)
+![Landing Page](3x-Devs\Project\screenshots\main_page.jpeg)
+![Landing Page](3x-Devs\Project\screenshots\main_page2.jpeg)
 
 ### Upload Page 
-![Upload Page](./screenshots/Upload_page.png)
+![Upload Page](3x-Devs\Project\screenshots\Upload_page.jpeg)
 
 ### Agent Generation and Distribution
-![Agent Generation](./screenshots/agents_working.png)
+![Agent Generation](3x-Devs\Project\screenshots\agents_working.jpeg)
 
 ### Tick Image
-![Tick Image](./screenshots/tick_image.png)
+![Tick Image](3x-Devs\Project\screenshots\Upload_page.jpeg)
 
 
 ---
