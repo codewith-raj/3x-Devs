@@ -32,6 +32,9 @@
 
 > **Deployed Application:** [Kavach Live Link](https://kavach-frontend-two.vercel.app/)
 
+ - Use the advisary report from the docs (uttarakhand_flood_advisory_2024.pdf) folder to upload and test the project.
+ - You can also download the advisary report from the link (https://drive.google.com/file/d/1q1E4lZ16otUkySWdbuSKTc_FtsQEmfTj/view?usp=sharing)
+
 ---
 
 ## Video Demo
